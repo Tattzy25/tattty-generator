@@ -3,14 +3,11 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
-import { neon } from "@neondatabase/serverless";
 // @ts-ignore
 import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const sql = neon(process.env.DATABASE_URL!);
 
 async function startServer() {
   const app = express();
@@ -161,14 +158,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", async () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    try {
-      const result = await sql`SELECT NOW()`;
-      console.log("Connected to Neon! Database time:", result[0].now);
-    } catch (error) {
-      console.error("Failed to connect to Neon:", error);
-    }
   });
 }
 
