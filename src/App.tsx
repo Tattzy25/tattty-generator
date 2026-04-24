@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UploadCloud, Share2, Download, X, Wand2, Paintbrush } from 'lucide-react';
 import { cn } from './lib/utils';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { GalleryGridBlock } from './components/uitripled/gallery-grid-block-shadcnui';
 
 export default function App() {
   const [promptText, setPromptText] = useState('');
@@ -104,62 +105,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col items-center justify-start relative pt-10 px-[10px]">
-      {/* INFINITE SCROLL GALLERY PLACEHOLDER */}
-      <div className="w-full max-w-7xl mx-auto mb-20">
-        <h2 className="text-2xl font-bold mb-6 text-left px-4">Model Gallery</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-          {models.map((model) => (
-            <div 
-              key={model.id} 
-              className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer bg-white group flex flex-col"
-              onClick={() => {
-                setModelName(model.model_name);
-                setArtistName(model.artist_name);
-                setTriggerWord(model.trigger_word);
-                setTags(model.tags);
-                setDescription(model.description);
-              }}
-            >
-              <div className="aspect-square w-full bg-gray-100 overflow-hidden relative">
-                {model.cover_image ? (
-                  <img 
-                    src={model.cover_image} 
-                    alt={model.model_name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <Wand2 className="w-8 h-8 opacity-20" />
-                  </div>
-                )}
-                {/* Active Indicator */}
-                {modelName === model.model_name && (
-                  <div className="absolute top-3 right-3 bg-black text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                    Selected
-                  </div>
-                )}
-              </div>
-              <div className="p-4 flex-1 flex flex-col">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <h3 className="font-bold text-sm truncate uppercase tracking-wide">{model.model_name}</h3>
-                  <div className="flex items-center gap-1 text-yellow-500 shrink-0">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                    <span className="text-[10px] font-bold">{model.stars || 0}</span>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider truncate mb-3">By {model.artist_name}</p>
-                <div className="flex flex-wrap gap-1 mt-auto">
-                  {(model.tags || []).slice(0, 2).map((tag: string) => (
-                    <span key={tag} className="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-bold tracking-wider uppercase">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
+      <div className="w-full max-w-[1400px] pb-24">
+        <GalleryGridBlock 
+          models={models} 
+          onSelectModel={(model) => {
+            setModelName(model.model_name);
+            setArtistName(model.artist_name);
+            setTriggerWord(model.trigger_word);
+            setTags(model.tags);
+            setDescription(model.description);
+          }} 
+        />
       </div>
 
       <Sheet>

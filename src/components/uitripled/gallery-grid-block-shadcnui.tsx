@@ -7,91 +7,37 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Grid, X, ZoomIn } from "lucide-react";
 import { KeyboardEvent, useState } from "react";
 
-const galleryImages = [
-  {
-    id: 1,
-    url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
-    title: "Abstract Architecture",
-    category: "Architecture",
-  },
-  {
-    id: 2,
-    url: "https://images.unsplash.com/photo-1618556450994-a6a128ef0d9d?w=500",
-    title: "Modern Design",
-    category: "Design",
-  },
-  {
-    id: 3,
-    url: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=500",
-    title: "Urban Landscape",
-    category: "Nature",
-  },
-  {
-    id: 4,
-    url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500",
-    title: "Digital Art",
-    category: "Art",
-  },
-  {
-    id: 5,
-    url: "https://images.unsplash.com/photo-1618556450991-2f1af64e8191?w=500",
-    title: "Creative Space",
-    category: "Architecture",
-  },
-  {
-    id: 6,
-    url: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=500",
-    title: "Minimalist View",
-    category: "Design",
-  },
-];
-
-export function GalleryGridBlock() {
+export function GalleryGridBlock({ models, onSelectModel }: { models: any[], onSelectModel: (model: any) => void }) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [filter, setFilter] = useState<string>("All");
-
-  const categories = [
-    "All",
-    ...new Set(galleryImages.map((img) => img.category)),
-  ];
-
-  const filteredImages =
-    filter === "All"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === filter);
 
   const handleNext = () => {
-    if (selectedImage !== null) {
-      const currentIndex = galleryImages.findIndex(
-        (img) => img.id === selectedImage
-      );
-      const nextIndex = (currentIndex + 1) % galleryImages.length;
-      setSelectedImage(galleryImages[nextIndex].id);
+    if (selectedImage !== null && models.length > 0) {
+      const currentIndex = models.findIndex((img) => img.id === selectedImage);
+      const nextIndex = (currentIndex + 1) % models.length;
+      setSelectedImage(models[nextIndex].id);
+      onSelectModel(models[nextIndex]);
     }
   };
 
   const handlePrev = () => {
-    if (selectedImage !== null) {
-      const currentIndex = galleryImages.findIndex(
-        (img) => img.id === selectedImage
-      );
-      const prevIndex =
-        (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-      setSelectedImage(galleryImages[prevIndex].id);
+    if (selectedImage !== null && models.length > 0) {
+      const currentIndex = models.findIndex((img) => img.id === selectedImage);
+      const prevIndex = (currentIndex - 1 + models.length) % models.length;
+      setSelectedImage(models[prevIndex].id);
+      onSelectModel(models[prevIndex]);
     }
   };
 
-  const selectedImageData = galleryImages.find(
-    (img) => img.id === selectedImage
-  );
+  const selectedImageData = models.find((img) => img.id === selectedImage);
 
   const handleCardKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
-    imageId: number
+    image: any
   ) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      setSelectedImage(imageId);
+      setSelectedImage(image.id);
+      onSelectModel(image);
     }
   };
 
@@ -101,12 +47,12 @@ export function GalleryGridBlock() {
         {/* Gallery Grid */}
         <motion.div
           layout
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6"
           role="list"
           aria-label="Gallery items"
         >
           <AnimatePresence mode="popLayout">
-            {filteredImages.map((image, index) => (
+            {models.map((image, index) => (
               <motion.div
                 key={image.id}
                 layout
@@ -115,19 +61,23 @@ export function GalleryGridBlock() {
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 role="listitem"
+                className="break-inside-avoid"
               >
                 <Card
                   className="group relative cursor-pointer overflow-hidden border-none transition-all hover:shadow-2xl rounded-[40px] aspect-square"
-                  onClick={() => setSelectedImage(image.id)}
-                  onKeyDown={(event) => handleCardKeyDown(event, image.id)}
+                  onClick={() => {
+                    setSelectedImage(image.id);
+                    onSelectModel(image);
+                  }}
+                  onKeyDown={(event) => handleCardKeyDown(event, image)}
                   role="button"
                   tabIndex={0}
-                  aria-label={`View details for ${image.title}`}
+                  aria-label={`View details for ${image.model_name}`}
                 >
                   <div className="absolute inset-0 w-full h-full m-0 p-0">
                     <motion.img
-                      src={image.url}
-                      alt={image.title}
+                      src={image.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"}
+                      alt={image.model_name}
                       className="absolute inset-0 w-full h-full object-cover m-0 p-0"
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.3 }}
@@ -138,14 +88,18 @@ export function GalleryGridBlock() {
                       initial={{ opacity: 0 }}
                       whileHover={{ opacity: 1 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm m-0 p-0"
+                      className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm m-0 p-0 px-4 text-center"
                       aria-hidden="true"
                     >
                       <ZoomIn className="mb-2 h-8 w-8 text-[var(--muted-foreground)]" />
-                      <h3 className="mb-1 text-center text-lg font-semibold text-[var(--muted-foreground)]">
-                        {image.title}
+                      <h3 className="mb-1 text-center text-lg font-semibold text-[var(--muted-foreground)] uppercase">
+                        {image.model_name}
                       </h3>
-                      <Badge variant="secondary">{image.category}</Badge>
+                      <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                        {(image.tags || []).slice(0, 2).map((tag: string) => (
+                          <Badge key={tag} variant="secondary" className="uppercase text-[10px] tracking-wider">{tag}</Badge>
+                        ))}
+                      </div>
                     </motion.div>
                   </div>
                 </Card>
@@ -221,14 +175,18 @@ export function GalleryGridBlock() {
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <img
-                    src={selectedImageData.url}
-                    alt={selectedImageData.title}
+                    src={selectedImageData.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"}
+                    alt={selectedImageData.model_name}
                     className="w-full h-full object-cover"
                   />
                   {/* Image Info Overlay on Front before it flips completely */}
                   <div className="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-                    <h3 className="text-3xl font-bold text-white mb-2">{selectedImageData.title}</h3>
-                    <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-none">{selectedImageData.category}</Badge>
+                    <h3 className="text-3xl font-bold text-white mb-2 uppercase">{selectedImageData.model_name}</h3>
+                    <div className="flex gap-2">
+                      {(selectedImageData.tags || []).slice(0, 2).map((tag: string) => (
+                        <Badge key={tag} variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-none uppercase tracking-wider text-[10px]">{tag}</Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -245,7 +203,7 @@ export function GalleryGridBlock() {
                      <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-gray-300"></div>
                      
                      <h3 className="text-4xl font-black uppercase tracking-[0.2em] text-gray-200 mb-6 text-center">
-                       {selectedImageData.title}
+                       {selectedImageData.model_name}
                      </h3>
                      <div className="w-16 h-1 bg-gray-200 mb-10 rounded-full"></div>
                      
