@@ -12,12 +12,12 @@ export default function App() {
   const [numOutputs, setNumOutputs] = useState('1');
   const [uploadedRef, setUploadedRef] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState('');
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
 
   const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
   const [status, setStatus] = useState<'idle' | 'training' | 'online'>('online');
 
-  const { models, loadMore, hasMore, isLoading, error } = useModels();
+  const { models, refetch, isLoading, error } = useModels();
 
   // Set initial selected model when data first loads
   useEffect(() => {
@@ -25,22 +25,6 @@ export default function App() {
       setSelectedModel(models[0]);
     }
   }, [models, selectedModel]);
-
-  // Infinite Scroll Listener
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop 
-        >= document.documentElement.offsetHeight - 200
-      ) {
-        if (!isLoading && hasMore) {
-          loadMore();
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasMore, isLoading, loadMore]);
 
   const handleGenerateImage = async () => {
     if (!selectedModel) {
@@ -65,12 +49,12 @@ export default function App() {
         params: {
           name: "artists_n_models",
           arguments: {
-            user_id: selectedModel.user_id,
-            gen_id: selectedModel.gen_id,
+            artist_prompt: promptText.trim(),
+            artist_color: colorMode,
             version: selectedModel.version,
-            prompt: promptText.trim(),
-            color: colorMode,
-            num_outputs: parseInt(numOutputs) || 1,
+            gen_id: selectedModel.gen_id,
+            trigger_word: selectedModel.trigger_word || "",
+            num_outputs: parseInt(numOutputs) || 1
           },
         },
       };
@@ -94,14 +78,31 @@ export default function App() {
       }
 
       const resultText = data.result?.content?.[0]?.text;
-      if (resultText) {
-        setGeneratedImage(resultText);
-        toast.success("Image Generated Successfully");
-      } else {
-        // Fallback or debug, but display a friendly success if JSON-RPC responds positively without the exact shape
-        setGeneratedImage(JSON.stringify(data));
-        toast.success("Creation process completed");
+      
+      if (!resultText) {
+        throw new Error("Invalid response format from server.");
       }
+
+      let parsedImages: string[] = [];
+      try {
+        const parsed = JSON.parse(resultText);
+        if (Array.isArray(parsed)) {
+          parsedImages = parsed;
+        } else {
+          parsedImages = [resultText];
+        }
+      } catch {
+        const urls = resultText.match(/https?:\/\/[^\s"',]+/g);
+        if (urls && urls.length > 0) {
+          parsedImages = urls;
+        } else {
+          parsedImages = [resultText];
+        }
+      }
+
+      setGeneratedImages(parsedImages);
+      toast.success("Image Generated Successfully");
+      
       refetch(); // Refetch after successful generation
     } catch (error: any) {
       console.error("Generation error:", error);
@@ -149,7 +150,7 @@ export default function App() {
             <div className="w-full mx-auto animate-in fade-in duration-500 flex flex-col">
               <div
                 style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col"
+                className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
               >
                 {/* Header */}
                 <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm">
@@ -220,36 +221,34 @@ export default function App() {
                   </div>
                 </div>
                 <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] h-full relative">
-            {/* LEFT - VERTICAL MODEL CAROUSEL (OVERLAY) */}
-            <div className="absolute -left-[170px] top-1/2 -translate-y-1/2 w-[150px] h-[560px] z-50 hidden lg:flex flex-col">
+            
+            {/* LEFT - VERTICAL MODEL CAROUSEL */}
+            <div className="hidden lg:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
               <div 
-                className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-4 py-8"
-                style={{ 
-                  maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)'
-                }}
+                className="w-full h-full overflow-y-auto overscroll-contain touch-pan-y hide-scrollbar flex flex-col gap-4 py-4 items-center"
+                style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {models.map((m: any, idx: number) => (
                   <button
                     key={m._reactKey || `${m.id}-${idx}`}
-                    onClick={() => {
-                      setSelectedModel(m);
-                    }}
+                    onClick={() => setSelectedModel(m)}
                     className={cn(
-                      "w-[150px] h-[150px] flex-shrink-0 rounded-[24px] overflow-hidden border-4 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black hover:scale-105 shadow-xl",
-                      selectedModel?.model_name === m.model_name ? "border-black opacity-100 scale-105" : "border-transparent opacity-80 hover:opacity-100"
+                      "w-[150px] h-[150px] flex-shrink-0 rounded-[20px] overflow-hidden border-[4px] transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black object-cover block cursor-pointer",
+                      selectedModel?.model_name === m.model_name 
+                        ? "border-black" 
+                        : "border-transparent hover:border-gray-200"
                     )}
                   >
-                    <img 
-                      src={m.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150"} 
-                      alt={m.model_name}
-                      width={150}
-                      height={150}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+                      <img 
+                        src={m.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150"} 
+                        alt={m.model_name}
+                        width={150}
+                        height={150}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
               </div>
             </div>
 
@@ -391,9 +390,9 @@ export default function App() {
                   {/* Action Icons */}
                   <div className={cn(
                     "flex items-center justify-center gap-3 transition-all duration-300",
-                    generatedImage ? "h-12 mb-2" : "h-0 mb-0 overflow-hidden"
+                    generatedImages.length > 0 ? "h-12 mb-2" : "h-0 mb-0 overflow-hidden"
                   )}>
-                    {generatedImage && (
+                    {generatedImages.length > 0 && (
                       <>
                         {/* Save to Profile */}
                         <button
@@ -409,10 +408,14 @@ export default function App() {
                         {/* Download */}
                         <button
                           onClick={() => {
-                            const a = document.createElement('a');
-                            a.href = generatedImage;
-                            a.download = 'generated-image.png';
-                            a.click();
+                            generatedImages.forEach((img, i) => {
+                              const a = document.createElement('a');
+                              a.href = img;
+                              a.download = `generated-image-${i+1}.png`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            });
                           }}
                           className="group relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-black"
                           title="Download"
@@ -443,9 +446,25 @@ export default function App() {
                   </div>
                   {/* Image / Placeholder */}
                   <div className="flex-1 min-h-0 flex flex-col items-center">
-                    {generatedImage ? (
-                      <div className="w-full aspect-square max-h-full rounded-3xl overflow-hidden shadow-lg bg-gray-100">
-                        <img src={generatedImage} alt="Generated result" className="w-full h-full object-cover" />
+                    {generatedImages.length > 0 ? (
+                      <div className={cn(
+                        "w-full aspect-square max-h-full rounded-3xl overflow-hidden shadow-lg bg-gray-100",
+                        generatedImages.length > 1 ? "grid gap-2 p-2" : "",
+                        generatedImages.length === 2 ? "grid-cols-2" : "",
+                        generatedImages.length >= 3 ? "grid-cols-2 grid-rows-2" : ""
+                      )}>
+                        {generatedImages.length === 1 ? (
+                          <img src={generatedImages[0]} alt="Generated result" className="w-full h-full object-cover" />
+                        ) : (
+                          generatedImages.map((img, i) => (
+                            <div key={i} className={cn(
+                              "relative overflow-hidden rounded-xl bg-gray-200 w-full h-full",
+                              generatedImages.length === 3 && i === 2 ? "col-span-2" : ""
+                            )}>
+                              <img src={img} alt={`Generated result ${i+1}`} className="w-full h-full object-cover" />
+                            </div>
+                          ))
+                        )}
                       </div>
                     ) : (
                       <div className="w-full aspect-square max-h-full rounded-3xl overflow-hidden shadow-lg bg-gray-50 flex items-center justify-center">
@@ -463,23 +482,23 @@ export default function App() {
                       </div>
                     )}
                     {/* Edit Image Button */}
-                    {generatedImage && (
+                    {generatedImages.length > 0 && (
                         <button
                           className="mt-3 bg-black text-white rounded-full px-4 py-2.5 font-bold text-[14px] tracking-wider uppercase hover:bg-gray-900 active:scale-[0.98] transition-all flex items-center gap-2"
                         onClick={async () => {
                           try {
-                            const response = await fetch(generatedImage);
+                            const response = await fetch(generatedImages[0]);
                             if (response.ok) {
                               const blob = await response.blob();
                               const file = new File([blob], 'generated-image.png', { type: 'image/png' });
                               setUploadedRef(file);
                             } else {
-                              const file = new File([''], `${generatedImage}`, { type: 'image/png' });
+                              const file = new File([''], `${generatedImages[0]}`, { type: 'image/png' });
                               setUploadedRef(file);
                             }
-                            setGeneratedImage('');
+                            setGeneratedImages([]);
                           } catch {
-                            setGeneratedImage('');
+                            setGeneratedImages([]);
                           }
                         }}
                       >

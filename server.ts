@@ -45,7 +45,8 @@ async function startServer() {
     console.log("Calling MCP server with payload:", JSON.stringify(payload, null, 2));
 
     try {
-      const mcpResponse = await fetch("https://api.dify.ai/mcp/server/9d1qVyjk5O2fsgOc/mcp", {
+      const mcpUrl = process.env.MCP_SERVER_URL || "";
+      const mcpResponse = await fetch(mcpUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

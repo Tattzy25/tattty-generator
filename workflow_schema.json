@@ -1,0 +1,114 @@
+{
+  "request": {
+    "type": "object",
+    "description": "Payload sent from the React frontend to the backend (/api/generate-image) when the user clicks 'CREATE MY IMAGE'.",
+    "properties": {
+      "jsonrpc": {
+        "type": "string",
+        "example": "2.0"
+      },
+      "id": {
+        "type": "string",
+        "description": "The unique gen_id of the selected model",
+        "example": "pL1wS8kM4z"
+      },
+      "method": {
+        "type": "string",
+        "example": "tools/call"
+      },
+      "params": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "artists_n_models"
+          },
+          "arguments": {
+            "type": "object",
+            "properties": {
+              "artist_prompt": {
+                "type": "string",
+                "description": "The text entered by the user in the 'Describe Your Style' textarea",
+                "example": "A cinematic portrait of a futuristic city..."
+              },
+              "artist_color": {
+                "type": "string",
+                "enum": ["color", "black"],
+                "description": "The color mode selected by the user"
+              },
+              "version": {
+                "type": "string",
+                "description": "The version ID of the selected model",
+                "example": "b83c88d22ef35gb292f0e8c39ded19146723e9d9d9339681496geed09gc1223"
+              },
+              "gen_id": {
+                "type": "string",
+                "description": "The unique gen_id of the selected model",
+                "example": "pL1wS8kM4z"
+              },
+              "trigger_word": {
+                "type": "string",
+                "description": "The specific trigger word for the selected model",
+                "example": "futurama"
+              },
+              "num_outputs": {
+                "type": "integer",
+                "enum": [1, 2, 3, 4],
+                "description": "The number of image outputs selected by the user"
+              }
+            },
+            "required": [
+              "artist_prompt",
+              "artist_color",
+              "version",
+              "gen_id",
+              "trigger_word",
+              "num_outputs"
+            ]
+          }
+        },
+        "required": ["name", "arguments"]
+      }
+    },
+    "required": ["jsonrpc", "id", "method", "params"]
+  },
+  "response": {
+    "type": "object",
+    "description": "The expected JSON response returned from the MCP server back through the backend to the frontend.",
+    "properties": {
+      "jsonrpc": {
+        "type": "string",
+        "example": "2.0"
+      },
+      "id": {
+        "type": "string",
+        "example": "pL1wS8kM4z"
+      },
+      "result": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "text"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "A stringified JSON array or plain text containing the generated image URLs. The frontend parses this to render 1, 2, 3, or 4 images.",
+                  "example": "[\"https://example.com/image-1.png\", \"https://example.com/image-2.png\"]"
+                }
+              },
+              "required": ["type", "text"]
+            }
+          }
+        },
+        "required": ["content"]
+      }
+    },
+    "required": ["jsonrpc", "id", "result"]
+  }
+}
