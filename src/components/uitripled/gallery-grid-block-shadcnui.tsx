@@ -217,7 +217,7 @@ export function GalleryGridBlock({ models, onSelectModel }: { models: any[], onS
                         </div>
                         
                         <div className="flex flex-col items-start w-full mb-6 shrink-0">
-                          {selectedImageData.model_name.includes('/') ? (
+                          {selectedImageData.model_name?.includes('/') ? (
                             <>
                               <h3 className="text-3xl md:text-4xl text-black leading-tight" style={{ fontFamily: "'Rock Salt', cursive" }}>
                                 {selectedImageData.model_name.split('/')[0]}
@@ -228,7 +228,7 @@ export function GalleryGridBlock({ models, onSelectModel }: { models: any[], onS
                             </>
                           ) : (
                             <h3 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 leading-tight break-words" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-                              {selectedImageData.model_name}
+                              {selectedImageData.model_name || ''}
                             </h3>
                           )}
                         </div>

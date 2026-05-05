@@ -43,7 +43,7 @@ export function useModels() {
           trigger_word: m.triggerWord,
           description: m.description,
           tags: parseTagsField(m.tags),
-          cover_image: m.coverImage || m.imageUrl,
+          cover_image: m.coverImage,
           user_id: m.userId,
           gen_id: m.gen_id,
           version: m.versionId,
