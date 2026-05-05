@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { listModels } from '../lib/api';
 
 export interface ModelData {
   id?: string | number;
@@ -8,11 +9,18 @@ export interface ModelData {
   tags?: string[];
   trigger_word?: string;
   cover_image?: string;
-  user_id: string;
-  gen_id: string;
-  version: string;
+  user_id?: string;
+  gen_id?: string;
+  version?: string;
   _reactKey?: string;
   [key: string]: any;
+}
+
+function parseTagsField(raw: any): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') return raw.split(',').map((t: string) => t.trim()).filter(Boolean);
+  return [];
 }
 
 export function useModels() {
@@ -24,23 +32,27 @@ export function useModels() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("https://d1-start.avi-kay2019.workers.dev/api/models");
-      if (!res.ok) {
-        throw new Error(`Failed to load models: ${res.statusText}`);
-      }
-      
-      const json = await res.json();
-      
+      const items = await listModels();
+
       if (!cancelled) {
-        // Assign a consistent unique key based on gen_id or fallback
-        const dataWithUniqueKeys = (json.data || []).map((m: any, idx: number) => ({
+        const mapped: ModelData[] = items.map((m: any, idx: number) => ({
           ...m,
-          _reactKey: m.gen_id || m.id || idx.toString()
+          id: m.gen_id || m.key || idx,
+          model_name: m.modelName,
+          artist_name: m.artistName,
+          trigger_word: m.triggerWord,
+          description: m.description,
+          tags: parseTagsField(m.tags),
+          cover_image: m.coverImage || m.imageUrl,
+          user_id: m.userId,
+          gen_id: m.gen_id,
+          version: m.versionId,
+          _reactKey: m.gen_id || m.key || String(idx),
         }));
-        setModels(dataWithUniqueKeys);
+        setModels(mapped);
       }
     } catch (err: any) {
-      console.error("Data fetching error:", err);
+      console.error('Failed to load models:', err);
       if (!cancelled) setError(err);
     } finally {
       if (!cancelled) setIsLoading(false);
@@ -49,27 +61,16 @@ export function useModels() {
 
   useEffect(() => {
     let cancelled = false;
-
     loadModels(cancelled);
 
-    const interval = setInterval(() => {
-      loadModels(cancelled);
-    }, 60_000);
-
+    const interval = setInterval(() => loadModels(cancelled), 60_000);
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
   }, [loadModels]);
 
-  const refetch = () => {
-    loadModels(false);
-  };
+  const refetch = () => loadModels(false);
 
-  return { 
-    models, 
-    refetch,
-    isLoading, 
-    error 
-  };
+  return { models, refetch, isLoading, error };
 }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UploadCloud, Share2, Download, X, Wand2, Paintbrush } from 'lucide-react';
 import { cn } from './lib/utils';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
+import { Button } from "@/components/ui/button";
 import { GalleryGridBlock } from './components/uitripled/gallery-grid-block-shadcnui';
 import { toast } from 'sonner';
 import { useModels, ModelData } from './hooks/useModels';
@@ -140,7 +141,7 @@ export default function App() {
              <span className="text-[14px] font-bold tracking-[0.2em] uppercase" style={{ writingMode: 'vertical-rl' }}>Studio</span>
           </button>
         </SheetTrigger>
-        <SheetContent side="right" className="!w-screen !max-w-[100vw] !h-screen p-0 border-none overflow-hidden bg-black/10 backdrop-blur-3xl m-0 rounded-none inset-y-0 right-0 !duration-1000 data-[state=open]:!duration-1000 data-[state=closed]:!duration-1000 transition-all ease-in-out">
+        <SheetContent side="right" showCloseButton={false} className="!w-screen !max-w-[100vw] !h-screen p-0 border-none overflow-hidden bg-black/10 backdrop-blur-3xl m-0 rounded-none inset-y-0 right-0 !duration-1000 data-[state=open]:!duration-1000 data-[state=closed]:!duration-1000 transition-all ease-in-out">
           <SheetHeader className="sr-only">
              <SheetTitle>AI Studio</SheetTitle>
              <SheetDescription>Generate art with AI</SheetDescription>
@@ -153,7 +154,16 @@ export default function App() {
                 className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
               >
                 {/* Header */}
-                <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm">
+                <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm relative">
+                  
+                  {/* Close Button */}
+                  <SheetClose className="absolute right-6 top-1/2 -translate-y-1/2 z-50" asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full bg-gray-50 hover:bg-gray-200 border border-gray-100 w-10 h-10">
+                      <X className="w-5 h-5 text-gray-500" strokeWidth={2.5} />
+                      <span className="sr-only">Close</span>
+                    </Button>
+                  </SheetClose>
+
                   {/* Model Name Area */}
                   <div className="flex flex-col items-start gap-1 shrink-0">
                     <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Model</span>
@@ -225,30 +235,30 @@ export default function App() {
             {/* LEFT - VERTICAL MODEL CAROUSEL */}
             <div className="hidden lg:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
               <div 
-                className="w-full h-full overflow-y-auto overscroll-contain touch-pan-y hide-scrollbar flex flex-col gap-4 py-4 items-center"
+                className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-6 py-4 items-center"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                {models.map((m: any, idx: number) => (
+                {[...models, ...models, ...models].map((m: any, idx: number) => (
                   <button
-                    key={m._reactKey || `${m.id}-${idx}`}
+                    key={`${m._reactKey || m.id}-${idx}`}
                     onClick={() => setSelectedModel(m)}
                     className={cn(
                       "w-[150px] h-[150px] flex-shrink-0 rounded-[20px] overflow-hidden border-[4px] transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black object-cover block cursor-pointer",
                       selectedModel?.model_name === m.model_name 
-                        ? "border-black" 
-                        : "border-transparent hover:border-gray-200"
+                        ? "border-black opacity-100" 
+                        : "border-transparent hover:border-gray-200 opacity-100"
                     )}
                   >
-                      <img 
-                        src={m.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150"} 
-                        alt={m.model_name}
-                        width={150}
-                        height={150}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+                    <img 
+                      src={m.cover_image || "https://cdn.shopify.com/s/files/1/0649/4155/5787/files/Untitled_design_9.png?v=1777847420"}
+                      alt={m.model_name}
+                      width={150}
+                      height={150}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
 
