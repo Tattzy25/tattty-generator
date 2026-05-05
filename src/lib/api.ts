@@ -1,30 +1,33 @@
-const API_BASE = import.meta.env.VITE_API_BASE as string;
+export const API_BASE = 'https://cloudy.avi-kay2019.workers.dev';
 
 export function getImageUrl(key: string) {
   return `${API_BASE}/download/${key}`;
 }
 
-export async function listModels(prefix?: string) {
-  const url = prefix
-    ? `${API_BASE}/list?prefix=${prefix}/`
-    : `${API_BASE}/list`;
+export async function listModels(cursor?: string) {
+  const url = cursor
+    ? `${API_BASE}/list?limit=50&cursor=${cursor}`
+    : `${API_BASE}/list?limit=50`;
   const res = await fetch(url);
-  const { objects } = await res.json();
+  const { objects, truncated, cursor: nextCursor } = await res.json();
 
-  return (objects || []).map((obj: any) => ({
-    key: obj.key,
-    imageUrl: `${API_BASE}/download/${obj.key}`,
-    modelName: obj.metadata?.modelName,
-    artistName: obj.metadata?.artistName,
-    triggerWord: obj.metadata?.triggerWord,
-    description: obj.metadata?.description,
-    tags: obj.metadata?.tags,
-    starRatings: obj.metadata?.starRatings,
-    coverImage: obj.metadata?.coverImage,
-    versionId: obj.metadata?.versionId,
-    userId: obj.metadata?.userId,
-    gen_id: obj.metadata?.gen_id,
-  }));
+  return {
+    models: (objects || []).map((obj: any) => ({
+      key: obj.key,
+      coverImage: obj.metadata?.coverImage,
+      modelName: obj.metadata?.modelName,
+      artistName: obj.metadata?.artistName,
+      triggerWord: obj.metadata?.triggerWord,
+      description: obj.metadata?.description,
+      tags: obj.metadata?.tags,
+      starRatings: obj.metadata?.starRatings,
+      versionId: obj.metadata?.versionId,
+      userId: obj.metadata?.userId,
+      gen_id: obj.metadata?.gen_id,
+    })),
+    hasMore: truncated,
+    nextCursor,
+  };
 }
 
 export async function getModelInfo(key: string) {

@@ -11,6 +11,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.4.1
         version: 1.4.1(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@cloudflare/ai-search-snippet':
+        specifier: ^0.0.39
+        version: 0.0.39
       '@datadog/browser-rum':
         specifier: ^6.33.0
         version: 6.33.0
@@ -315,6 +318,10 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@cloudflare/ai-search-snippet@0.0.39':
+    resolution: {integrity: sha512-1d9iyB9hZP2Zt+VfOMD/WEetyGZKmslB4BG7Lfi9bJZhNQFZELzoQ7ATWfcG7H2Zc856njQnqNJ8V/TeGhFmOg==}
+    engines: {node: '>=16.0.0'}
 
   '@datadog/browser-core@6.33.0':
     resolution: {integrity: sha512-h/xuBuY4Xi32CbBHkChMMWlOQ4al/mFF08x3o0hqrderfJvX7VO5tD3OVNwF+pfMXOGlDtBCIhwazr9sn24h3g==}
@@ -4001,6 +4008,8 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.5)
     optionalDependencies:
       '@types/react': 19.2.14
+
+  '@cloudflare/ai-search-snippet@0.0.39': {}
 
   '@datadog/browser-core@6.33.0': {}
 

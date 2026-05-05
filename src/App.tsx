@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { UploadCloud, Share2, Download, X, Wand2, Paintbrush } from 'lucide-react';
-import { cn } from './lib/utils';
+import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
 import { Button } from "@/components/ui/button";
 import { GalleryGridBlock } from './components/uitripled/gallery-grid-block-shadcnui';
 import { toast } from 'sonner';
 import { useModels, ModelData } from './hooks/useModels';
+import AISearch from '../components/AI-search';
 
 export default function App() {
   const [promptText, setPromptText] = useState('');
@@ -125,6 +126,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-black flex flex-col items-center justify-start relative pt-10 px-[10px]">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-40 w-full max-w-2xl px-4 pointer-events-auto">
+        <AISearch />
+      </div>
       <div className="w-full max-w-[1400px] pb-24">
         <GalleryGridBlock
           models={models}

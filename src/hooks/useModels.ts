@@ -32,7 +32,7 @@ export function useModels() {
     setIsLoading(true);
     setError(null);
     try {
-      const items = await listModels();
+      const { models: items } = await listModels();
 
       if (!cancelled) {
         const mapped: ModelData[] = items.map((m: any, idx: number) => ({

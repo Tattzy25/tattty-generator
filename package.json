@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@cloudflare/ai-search-snippet": "^0.0.39",
     "@datadog/browser-rum": "^6.33.0",
     "@datadog/browser-rum-react": "^6.33.0",
     "@fontsource-variable/geist": "^5.2.8",

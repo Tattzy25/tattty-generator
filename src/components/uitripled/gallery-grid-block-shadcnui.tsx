@@ -76,7 +76,7 @@ export function GalleryGridBlock({ models, onSelectModel }: { models: any[], onS
                 >
                   <div className="absolute inset-0 w-full h-full m-0 p-0">
                     <motion.img
-                      src={image.cover_image}
+                      src={image.cover_image || "https://cdn.shopify.com/s/files/1/0649/4155/5787/files/Untitled_design_9.png?v=1777847420"}
                       alt={image.model_name}
                       width={500}
                       height={500}
