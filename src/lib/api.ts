@@ -15,15 +15,15 @@ export async function listModels(cursor?: string) {
       const m = obj.metadata || {};
       return {
         key: obj.key,
-        coverImage: m.coverimage,
-        modelName: m.modelname,
-        artistName: m.artistname,
-        triggerWord: m.triggerword,
+        coverImage: m.coverimage || m.coverImage,
+        modelName: m.modelname || m.modelName,
+        artistName: m.artistname || m.artistName,
+        triggerWord: m.triggerword || m.triggerWord,
         description: m.description,
         tags: m.tags,
-        starRatings: m.starratings,
-        versionId: m.versionid,
-        userId: m.userid,
+        starRatings: m.starratings || m.starRatings,
+        versionId: m.versionid || m.versionId,
+        userId: m.userid || m.userId,
         gen_id: m.gen_id,
       };
     }),
