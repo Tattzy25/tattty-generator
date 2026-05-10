@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, Share2, Download, X, Wand2, Paintbrush } from 'lucide-react';
+import { UploadCloud, Share2, Download, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
-import { Button } from "@/components/ui/button";
-import { GalleryGridBlock } from './components/uitripled/gallery-grid-block-shadcnui';
 import { toast } from 'sonner';
 import { useModels, ModelData } from './hooks/useModels';
-import AISearch from '../components/AI-search';
 
 export default function App() {
   const [promptText, setPromptText] = useState('');
   const [colorMode, setColorMode] = useState('color');
   const [numOutputs, setNumOutputs] = useState('1');
-  const [uploadedRef, setUploadedRef] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
 
   const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
-  const [status, setStatus] = useState<'idle' | 'training' | 'online'>('online');
 
-  const { models, refetch, isLoading, error } = useModels();
+  const { models, refetch } = useModels();
 
-  // Set initial selected model when data first loads
+  const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number | null>(null);
+
+  const carouselImages = [
+    { url: "https://styles.tattty.com/1%20(1).png",                          label: "Black & White" },
+    { url: "https://styles.tattty.com/1%20(7).png",                          label: "Black & White" },
+    { url: "https://styles.tattty.com/ANIME.png",                            label: "Anime" },
+    { url: "https://styles.tattty.com/Cyberpunk-portrait%20(1).png",         label: "Cyberpunk" },
+    { url: "https://styles.tattty.com/Realism.png",                          label: "Realism" },
+    { url: "https://styles.tattty.com/Untitled%20design%20(3).png",          label: "Portrait" },
+    { url: "https://styles.tattty.com/alchemical-etch-portrait.png",         label: "Alchemical Etch" },
+    { url: "https://styles.tattty.com/anime-portrait%20(1).png",             label: "Anime Portrait" },
+    { url: "https://styles.tattty.com/brutalism-portrait%20(1).png",         label: "Brutalism" },
+    { url: "https://styles.tattty.com/brutalism-portrait.png",               label: "Brutalism" },
+    { url: "https://styles.tattty.com/chi.jpg",                              label: "Chi" },
+    { url: "https://styles.tattty.com/continuous-line-portrait%20(1).png",   label: "Continuous Line" },
+    { url: "https://styles.tattty.com/download.png",                         label: "Polka Trash" },
+    { url: "https://styles.tattty.com/futuristic-portrait%20(1).png",        label: "Futuristic" },
+    { url: "https://styles.tattty.com/heavy-blackwork-portrait.png",         label: "Heavy Blackwork" },
+    { url: "https://styles.tattty.com/ignorant-tattoo-portrait%20(1).png",   label: "Ignorant" },
+    { url: "https://styles.tattty.com/ignorant-tattoo-portrait%20(2).png",   label: "Ignorant" },
+    { url: "https://styles.tattty.com/lofi-comic-portrait.png",              label: "Lofi Comic" },
+    { url: "https://styles.tattty.com/out-0%20(33).webp",                    label: "Watercolor" },
+    { url: "https://styles.tattty.com/sketchwork-portrait%20(1).png",        label: "Sketchwork" },
+  ];
+
   useEffect(() => {
     if (models.length > 0 && !selectedModel) {
       setSelectedModel(models[0]);
@@ -80,7 +98,7 @@ export default function App() {
       }
 
       const resultText = data.result?.content?.[0]?.text;
-      
+
       if (!resultText) {
         throw new Error("Invalid response format from server.");
       }
@@ -104,8 +122,8 @@ export default function App() {
 
       setGeneratedImages(parsedImages);
       toast.success("Image Generated Successfully");
-      
-      refetch(); // Refetch after successful generation
+
+      refetch();
     } catch (error: any) {
       console.error("Generation error:", error);
       toast.error(error.message || "System error. Please try again later.");
@@ -125,144 +143,120 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-start relative pt-10 px-[10px]">
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4 pointer-events-auto">
-        <AISearch />
-      </div>
-      <div className="w-full max-w-[1400px] pb-24">
-        <GalleryGridBlock
-          models={models}
-          onSelectModel={(model) => {
-            setSelectedModel(model);
-          }}
-        />
-      </div>
+    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center py-4 md:py-8 px-[10px]">
+      <div className="w-full max-w-[1400px] mx-auto animate-in fade-in duration-500 flex flex-col">
+        <div
+          style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
+          className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
+        >
+          {/* Header */}
+          <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm relative">
 
-      <Sheet>
-        <SheetTrigger asChild>
-          <button className="fixed top-1/2 right-0 -translate-y-1/2 bg-black text-white p-4 rounded-l-2xl shadow-2xl hover:bg-gray-900 transition-all z-50 flex flex-col items-center gap-2 group border-y border-l border-white/20">
-             <Paintbrush className="w-6 h-6 group-hover:-rotate-12 transition-transform" />
-             <span className="text-[14px] font-bold tracking-[0.2em] uppercase" style={{ writingMode: 'vertical-rl' }}>Studio</span>
-          </button>
-        </SheetTrigger>
-        <SheetContent side="right" showCloseButton={false} className="!w-screen !max-w-[100vw] !h-screen p-0 border-none overflow-hidden bg-black/10 backdrop-blur-3xl m-0 rounded-none inset-y-0 right-0 !duration-1000 data-[state=open]:!duration-1000 data-[state=closed]:!duration-1000 transition-all ease-in-out">
-          <SheetHeader className="sr-only">
-             <SheetTitle>AI Studio</SheetTitle>
-             <SheetDescription>Generate art with AI</SheetDescription>
-          </SheetHeader>
-          <div className="h-full overflow-y-auto py-4 md:py-8 px-[10px] flex items-center justify-center">
-            {/* MAIN GENERATOR SECTION */}
-            <div className="w-full mx-auto animate-in fade-in duration-500 flex flex-col">
-              <div
-                style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
-              >
-                {/* Header */}
-                <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm relative">
-                  
-                  {/* Close Button */}
-                  <SheetClose className="absolute right-6 top-1/2 -translate-y-1/2 z-50" asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full bg-gray-50 hover:bg-gray-200 border border-gray-100 w-10 h-10">
-                      <X className="w-5 h-5 text-gray-500" strokeWidth={2.5} />
-                      <span className="sr-only">Close</span>
-                    </Button>
-                  </SheetClose>
+            {/* Model Name Area */}
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Model</span>
+              {selectedModel?.model_name?.includes('/') ? (
+                <div className="flex items-baseline gap-0.5">
+                  <span
+                    className="text-[26px] text-black leading-[0.8]"
+                    style={{ fontFamily: "'Rock Salt', cursive" }}
+                  >
+                    {selectedModel.model_name.split('/')[0]}
+                  </span>
+                  <span
+                    className="text-[32px] font-bold text-gray-800 leading-[0.8] uppercase"
+                    style={{ fontFamily: "'Orbitron', sans-serif" }}
+                  >
+                    /{selectedModel.model_name.split('/').slice(1).join('/')}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-[32px] font-bold text-gray-800 uppercase shrink-0 leading-[0.8]" style={{ fontFamily: "'Orbitron', sans-serif" }}>{selectedModel?.model_name || 'Select Model'}</span>
+              )}
+            </div>
 
-                  {/* Model Name Area */}
-                  <div className="flex flex-col items-start gap-1 shrink-0">
-                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Model</span>
-                    {selectedModel?.model_name?.includes('/') ? (
-                      <div className="flex items-baseline gap-0.5">
-                        <span
-                          className="text-[26px] text-black leading-[0.8]"
-                          style={{ fontFamily: "'Rock Salt', cursive" }}
-                        >
-                          {selectedModel.model_name.split('/')[0]}
-                        </span>
-                        <span
-                          className="text-[32px] font-bold text-gray-800 leading-[0.8] uppercase"
-                          style={{ fontFamily: "'Orbitron', sans-serif" }}
-                        >
-                          /{selectedModel.model_name.split('/').slice(1).join('/')}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-[32px] font-bold text-gray-800 uppercase shrink-0 leading-[0.8]" style={{ fontFamily: "'Orbitron', sans-serif" }}>{selectedModel?.model_name || 'Select Model'}</span>
-                    )}
-                  </div>
+            {selectedModel?.artist_name && (
+              <>
+                <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
+                <div className="flex flex-col items-start gap-1 shrink-0">
+                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Artist</span>
+                  <span
+                    className="text-[26px] text-black leading-[0.8]"
+                    style={{ fontFamily: "'Rock Salt', cursive" }}
+                  >
+                    {selectedModel.artist_name}
+                  </span>
+                </div>
+              </>
+            )}
 
-                  {selectedModel?.artist_name && (
-                    <>
-                      <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-                      <div className="flex flex-col items-start gap-1 shrink-0">
-                        <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Artist</span>
-                        <span
-                          className="text-[26px] text-black leading-[0.8]"
-                          style={{ fontFamily: "'Rock Salt', cursive" }}
-                        >
-                          {selectedModel.artist_name}
-                        </span>
-                      </div>
-                    </>
-                  )}
-
-                  {selectedModel?.tags && selectedModel.tags.length > 0 && (
-                    <>
-                      <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-                      <div className="flex flex-col items-start gap-1 shrink-0">
-                        <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Tags</span>
-                        <div className="flex items-center gap-2 shrink-0 flex-nowrap whitespace-nowrap pt-1">
-                          {selectedModel.tags.slice(0, 2).map((tag, i) => (
-                            <span key={`${tag}-${i}`} className="text-[18px] font-black tracking-widest text-gray-500 uppercase leading-[0.8] px-2 py-0.5 bg-gray-50 rounded border border-gray-100">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-                  <div className="flex flex-col items-start gap-1 shrink-0">
-                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Most Loved</span>
-                    <div className="flex items-center gap-1 shrink-0 pt-1">
-                      {[1,2,3,4,5].map((star) => (
-                        <svg key={star} className="w-[24px] h-[24px] text-yellow-400 fill-current shrink-0" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
+            {selectedModel?.tags && selectedModel.tags.length > 0 && (
+              <>
+                <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
+                <div className="flex flex-col items-start gap-1 shrink-0">
+                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Tags</span>
+                  <div className="flex items-center gap-2 shrink-0 flex-nowrap whitespace-nowrap pt-1">
+                    {selectedModel.tags.slice(0, 2).map((tag, i) => (
+                      <span key={`${tag}-${i}`} className="text-[18px] font-black tracking-widest text-gray-500 uppercase leading-[0.8] px-2 py-0.5 bg-gray-50 rounded border border-gray-100">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-                <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] h-full relative">
-            
+              </>
+            )}
+
+            <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Most Loved</span>
+              <div className="flex items-center gap-1 shrink-0 pt-1">
+                {[1,2,3,4,5].map((star) => (
+                  <svg key={star} className="w-[24px] h-[24px] text-yellow-400 fill-current shrink-0" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] h-full relative">
+
             {/* LEFT - VERTICAL MODEL CAROUSEL */}
             <div className="hidden lg:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
-              <div 
+              <div
                 className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-6 py-4 items-center"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                {[...models, ...models, ...models].map((m: any, idx: number) => (
-                  <button
-                    key={`${m._reactKey || m.id}-${idx}`}
-                    onClick={() => setSelectedModel(m)}
-                    className={cn(
-                      "w-[150px] h-[150px] flex-shrink-0 rounded-[20px] overflow-hidden border-[4px] transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black object-cover block cursor-pointer",
-                      selectedModel?.model_name === m.model_name 
-                        ? "border-black opacity-100" 
-                        : "border-transparent hover:border-gray-200 opacity-100"
-                    )}
-                  >
-                    <img 
-                      src={m.cover_image || "https://cdn.shopify.com/s/files/1/0649/4155/5787/files/Untitled_design_9.png?v=1777847420"}
-                      alt={m.model_name}
-                      width={150}
-                      height={150}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+                {[...carouselImages, ...carouselImages, ...carouselImages].map((item, idx) => {
+                  const realIdx = idx % carouselImages.length;
+                  const isSelected = selectedCarouselIdx === realIdx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedCarouselIdx(isSelected ? null : realIdx)}
+                      className={cn(
+                        "w-[150px] flex-shrink-0 rounded-[20px] overflow-hidden border-[3px] transition-colors duration-150 focus-visible:outline-none flex flex-col",
+                        isSelected ? "border-black" : "border-transparent"
+                      )}
+                    >
+                      <div className="w-full h-[150px] relative">
+                        <img
+                          src={item.url}
+                          alt={item.label || ""}
+                          width={150}
+                          height={150}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                        {item.label && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1">
+                            <span className="text-white text-[9px] font-bold tracking-[0.15em] uppercase">{item.label}</span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -340,45 +334,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Upload Reference */}
-                {uploadedRef ? (
-                  <div
-                    className="w-full min-h-[110px] rounded-3xl p-4 flex flex-col items-center justify-center bg-transparent text-center"
-                    style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src={URL.createObjectURL(uploadedRef)} alt="Reference" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <div className="font-bold text-[16px] tracking-wider uppercase text-black truncate">{uploadedRef.name}</div>
-                        <div className="text-[14px] text-green-600 uppercase tracking-wider font-bold">Image Ready</div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setUploadedRef(null)}
-                        className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => document.getElementById('upload-input')?.click()}
-                    className="w-full h-[110px] rounded-3xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all bg-transparent text-center hover:bg-gray-200/30"
-                    style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                  >
-                    <UploadCloud className="w-8 h-8 mb-1 text-gray-400" />
-                    <div className="font-bold text-[16px] tracking-[0.2em] uppercase text-black">REFERENCE IMAGE</div>
-                    <div className="text-[14px] text-gray-500 uppercase tracking-wider">.PNG, .JPG, .WEBP</div>
-                  </button>
-                )}
-                <input id="upload-input" type="file" accept="image/*" className="hidden" onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setUploadedRef(e.target.files[0]);
-                  }
-                }} />
 
                 {/* Spacer */}
                 <div className="flex-1" />
@@ -495,71 +450,13 @@ export default function App() {
                         )}
                       </div>
                     )}
-                    {/* Edit Image Button */}
-                    {generatedImages.length > 0 && (
-                        <button
-                          className="mt-3 bg-black text-white rounded-full px-4 py-2.5 font-bold text-[14px] tracking-wider uppercase hover:bg-gray-900 active:scale-[0.98] transition-all flex items-center gap-2"
-                        onClick={async () => {
-                          try {
-                            const response = await fetch(generatedImages[0]);
-                            if (response.ok) {
-                              const blob = await response.blob();
-                              const file = new File([blob], 'generated-image.png', { type: 'image/png' });
-                              setUploadedRef(file);
-                            } else {
-                              const file = new File([''], `${generatedImages[0]}`, { type: 'image/png' });
-                              setUploadedRef(file);
-                            }
-                            setGeneratedImages([]);
-                          } catch {
-                            setGeneratedImages([]);
-                          }
-                        }}
-                      >
-                        Edit Image
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
             </div>
-                </div>
-              </div>
-            </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      </div>
     </div>
   );
-}
-
-function ArtistCard({
-  modelName,
-  artistName,
-  tags,
-  description,
-  status,
-  showStars,
-}: {
-  modelName: string;
-  artistName: string;
-  tags: string[];
-  description: string;
-  status: 'idle' | 'training' | 'online';
-  showStars?: boolean;
-}) {
-  const statusLabel = status === 'online' ? 'Online' : status === 'training' ? 'Training' : 'Offline';
-  const statusClass =
-    status === 'online'
-      ? 'bg-green-100 text-green-700'
-      : status === 'training'
-        ? 'bg-yellow-100 text-yellow-700'
-        : 'bg-gray-100 text-gray-600';
-
-  const visibleTags = (tags || [])
-    .map((t) => t.trim())
-    .filter(Boolean)
-    .slice(0, 3);
-
-  return null; // Component removed from rendering layout pending further instructions
 }
