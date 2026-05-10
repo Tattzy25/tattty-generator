@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { UploadCloud, Share2, Download, Wand2 } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { MotionAccordion } from './components/unlumen-ui/motion-faqs-accordion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useModels, ModelData } from './hooks/useModels';
 
 export default function App() {
   const [promptText, setPromptText] = useState('');
-  const [colorMode, setColorMode] = useState('color');
-  const [numOutputs, setNumOutputs] = useState('1');
+  const [colorMode, setColorMode] = useState('black');
+  const [numOutputs, setNumOutputs] = useState('4');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
 
@@ -16,6 +18,8 @@ export default function App() {
   const { models, refetch } = useModels();
 
   const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number | null>(null);
+  const promptQuestion = import.meta.env.VITE_PROMPT_QUESTION || 'What style are you going for?';
+
 
   const carouselImages = [
     { url: "https://styles.tattty.com/1%20(1).png",                          label: "Black & White" },
@@ -261,95 +265,66 @@ export default function App() {
             </div>
 
             {/* MIDDLE - TRIGGER WORD, PROMPT, UPLOAD */}
-            <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col animate-in fade-in duration-700 delay-150 fill-mode-both">
-              <div className="w-full flex flex-col gap-4 flex-1">
-                {/* Trigger Word */}
-                <div>
-                  <div className="block text-[14px] font-bold tracking-[0.2em] text-black mb-2 uppercase text-center">Trigger Word</div>
-                  <div className="text-center py-2.5 px-4 rounded-xl bg-gray-50 border-2 border-gray-200">
-                    <span className="text-[18px] font-bold tracking-wider text-black">{selectedModel?.trigger_word || 'None'}</span>
+            <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
+              {/* TOP CONTENT */}
+              <div className="w-full flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Color Mode</div>
+                  <div className="flex items-center gap-2">
+                    {['color', 'black'].map((mode) => (
+                      <label key={mode} className={cn(
+                        'flex items-center gap-1.5 cursor-pointer px-4 py-2 rounded-full transition-all',
+                        colorMode === mode ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      )}>
+                        <input type="radio" name="colorMode" value={mode} checked={colorMode === mode} onChange={() => setColorMode(mode)} className="sr-only" />
+                        <span className="text-[14px] font-bold tracking-wider uppercase">{mode === 'black' ? 'B&W' : 'Color'}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
-
-                {/* Prompt Input */}
-                <div>
-                  <label htmlFor="promptText" className="block text-[14px] font-bold tracking-[0.2em] text-black mb-2 uppercase text-center">Describe Your Style</label>
-                  <textarea
-                    id="promptText"
-                    name="promptText"
-                    value={promptText}
-                    onChange={(e) => setPromptText(e.target.value)}
-                    rows={4}
-                    style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                    className="w-full p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-none text-[18px]"
-                    placeholder="A cinematic portrait..."
+                <div className="flex flex-col gap-3 w-full px-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Number Outputs</span>
+                    <span className="text-[18px] font-bold text-black">{numOutputs}</span>
+                  </div>
+                  <Slider
+                    min={1}
+                    max={4}
+                    step={1}
+                    value={[parseInt(numOutputs)]}
+                    onValueChange={(val) => setNumOutputs(String(val[0]))}
+                    className="w-full mb-[10px]"
                   />
                 </div>
 
-                {/* Color Mode + Style Row */}
-                <div className="flex items-center justify-between gap-6">
-                  {/* Color Mode */}
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Color Mode</div>
-                    <div className="flex items-center gap-2">
-                      {['color', 'black'].map((mode) => (
-                        <label key={mode} className={cn(
-                          'flex items-center gap-1.5 cursor-pointer px-4 py-2 rounded-full transition-all',
-                          colorMode === mode ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        )}>
-                          <input
-                            type="radio"
-                            name="colorMode"
-                            value={mode}
-                            checked={colorMode === mode}
-                            onChange={() => setColorMode(mode)}
-                            className="sr-only"
-                          />
-                          <span className="text-[14px] font-bold tracking-wider uppercase">{mode === 'black' ? 'B&W' : 'Color'}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  {/* Number Outputs Input */}
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Number Outputs</div>
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4].map((num) => (
-                        <label key={num} className={cn(
-                          'flex items-center gap-1.5 cursor-pointer w-10 h-10 justify-center rounded-full transition-all',
-                          numOutputs === String(num) ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        )}>
-                          <input
-                            type="radio"
-                            name="numOutputs"
-                            value={num}
-                            checked={numOutputs === String(num)}
-                            onChange={(e) => setNumOutputs(e.target.value)}
-                            className="sr-only"
-                          />
-                          <span className="text-[14px] font-bold">{num}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* CREATE BUTTON */}
-                {selectedModel && (
-                  <button
-                    onClick={handleGenerateImage}
-                    disabled={isGenerating || !promptText.trim()}
-                    className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <Wand2 className="w-5 h-5" />
-                    {isGenerating ? 'CREATING...' : 'CREATE MY IMAGE'}
-                  </button>
-                )}
+                <MotionAccordion
+                  items={[{ question: 'Click to Unlock', answer: promptQuestion }]}
+                  className="w-full"
+                />
               </div>
+
+              {/* Textarea - flex-1 locks bottom to button, top floats */}
+              <textarea
+                id="promptText"
+                name="promptText"
+                value={promptText}
+                onChange={(e) => setPromptText(e.target.value)}
+                style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
+                className="w-full flex-1 p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-none text-[18px] mt-[20px] mb-[10px]"
+                placeholder="A cinematic portrait..."
+              />
+
+              {/* BUTTON - isolated at bottom, never moves */}
+              {selectedModel && (
+                <button
+                  onClick={handleGenerateImage}
+                  disabled={isGenerating || !promptText.trim()}
+                  className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Wand2 className="w-5 h-5" />
+                  {isGenerating ? 'CREATING...' : 'CREATE MY IMAGE'}
+                </button>
+              )}
             </div>
 
             {/* RIGHT - RENDERS */}
