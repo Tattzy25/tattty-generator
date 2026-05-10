@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, Share2, Download, Wand2 } from 'lucide-react';
+import { UploadCloud, Share2, Download, Wand2, Lock } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { MotionAccordion } from './components/unlumen-ui/motion-faqs-accordion';
 import { cn } from '@/lib/utils';
@@ -297,10 +297,20 @@ export default function App() {
                   />
                 </div>
 
-                <MotionAccordion
-                  items={[{ question: 'Click to Unlock', answer: promptQuestion }]}
-                  className="w-full"
-                />
+                <div style={{ border: '2px solid #000000', borderRadius: '30px' }}>
+                  <MotionAccordion
+                    items={[{
+                      question: (
+                        <span className="flex items-center gap-3">
+                          <Lock className="w-4 h-4 shrink-0 text-gray-500" />
+                          <span className="text-[13px] font-bold tracking-[0.2em] uppercase text-gray-500">Click to Unlock</span>
+                        </span>
+                      ),
+                      answer: promptQuestion
+                    }]}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {/* Textarea - flex-1 locks bottom to button, top floats */}
@@ -310,7 +320,7 @@ export default function App() {
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                className="w-full flex-1 p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-none text-[18px] mt-[20px] mb-[10px]"
+                className="w-full p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-y text-[18px] mt-[20px] mb-[10px] min-h-[160px]"
                 placeholder="A cinematic portrait..."
               />
 
