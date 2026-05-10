@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UploadCloud, Share2, Download, Wand2, Lock } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { MotionAccordion } from './components/unlumen-ui/motion-faqs-accordion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useModels, ModelData } from './hooks/useModels';
+
+const MODEL = {
+  model_name: 'tattzy25/tattty_4_all',
+  artist_name: 'TaTTTy',
+  tags: ['Tattoo', 'Portrait'],
+  gen_id: '',
+  version: '',
+  trigger_word: '',
+};
 
 export default function App() {
   const [promptText, setPromptText] = useState('');
@@ -13,11 +21,8 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
 
-  const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
-
-  const { models, refetch } = useModels();
-
   const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number | null>(null);
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const promptQuestion = import.meta.env.VITE_PROMPT_QUESTION || 'What style are you going for?';
 
 
@@ -44,21 +49,7 @@ export default function App() {
     { url: "https://styles.tattty.com/sketchwork-portrait%20(1).png",        label: "Sketchwork" },
   ];
 
-  useEffect(() => {
-    if (models.length > 0 && !selectedModel) {
-      setSelectedModel(models[0]);
-    }
-  }, [models, selectedModel]);
-
   const handleGenerateImage = async () => {
-    if (!selectedModel) {
-      toast.error("No model selected.");
-      return;
-    }
-    if (!selectedModel.gen_id) {
-      toast.error("Missing gen_id from database.");
-      return;
-    }
     if (!promptText.trim()) {
       toast.error("Prompt is required.");
       return;
@@ -68,16 +59,16 @@ export default function App() {
     try {
       const mcpPayload = {
         jsonrpc: "2.0",
-        id: selectedModel.gen_id,
+        id: MODEL.gen_id,
         method: "tools/call",
         params: {
           name: "artists_n_models",
           arguments: {
             artist_prompt: promptText.trim(),
             artist_color: colorMode,
-            version: selectedModel.version,
-            gen_id: selectedModel.gen_id,
-            trigger_word: selectedModel.trigger_word || "",
+            version: MODEL.version,
+            gen_id: MODEL.gen_id,
+            trigger_word: MODEL.trigger_word,
             num_outputs: parseInt(numOutputs) || 1
           },
         },
@@ -127,7 +118,6 @@ export default function App() {
       setGeneratedImages(parsedImages);
       toast.success("Image Generated Successfully");
 
-      refetch();
     } catch (error: any) {
       console.error("Generation error:", error);
       toast.error(error.message || "System error. Please try again later.");
@@ -137,11 +127,11 @@ export default function App() {
   };
 
   const handleShareEmbed = async () => {
-    if (navigator.share && selectedModel?.model_name) {
+    if (navigator.share) {
       await navigator.share({
-        title: selectedModel.model_name,
+        title: MODEL.model_name,
         text: 'Embed this generator on your site',
-        url: `${window.location.origin}/embed/${selectedModel.model_name.toLowerCase().replace(/\s+/g, '-')}`,
+        url: `${window.location.origin}/embed/${MODEL.model_name.toLowerCase().replace(/\s+/g, '-')}`,
       });
     }
   };
@@ -154,68 +144,44 @@ export default function App() {
           className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
         >
           {/* Header */}
-          <div className="h-[80px] w-full bg-white flex items-center justify-center border-none shrink-0 px-6 gap-6 text-center overflow-hidden whitespace-nowrap flex-nowrap leading-[0.8] border-b-2 border-black/5 shadow-sm relative">
+          <div className="w-full bg-white flex items-center justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-2 px-6 overflow-hidden">
+            <div className="grid gap-x-6 items-start whitespace-nowrap" style={{ gridTemplateColumns: 'auto 1px auto 1px auto 1px auto', gridTemplateRows: 'auto auto' }}>
+              {/* Labels row */}
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Model</span>
+              <div />
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Artist</span>
+              <div />
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Tags</span>
+              <div />
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Most Loved</span>
 
-            {/* Model Name Area */}
-            <div className="flex flex-col items-start gap-1 shrink-0">
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Model</span>
-              {selectedModel?.model_name?.includes('/') ? (
-                <div className="flex items-baseline gap-0.5">
-                  <span
-                    className="text-[26px] text-black leading-[0.8]"
-                    style={{ fontFamily: "'Rock Salt', cursive" }}
-                  >
-                    {selectedModel.model_name.split('/')[0]}
+              {/* Values row */}
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-[28px] font-bold text-gray-800 uppercase leading-none" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+                  {MODEL.model_name.split('/')[0]}
+                </span>
+                {MODEL.model_name.includes('/') && (
+                  <span className="text-[22px] text-black leading-none" style={{ fontFamily: "'Rock Salt', cursive" }}>
+                    /{MODEL.model_name.split('/').slice(1).join('/')}
                   </span>
-                  <span
-                    className="text-[32px] font-bold text-gray-800 leading-[0.8] uppercase"
-                    style={{ fontFamily: "'Orbitron', sans-serif" }}
-                  >
-                    /{selectedModel.model_name.split('/').slice(1).join('/')}
+                )}
+              </div>
+              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+              <span className="text-[22px] text-black leading-none" style={{ fontFamily: "'Rock Salt', cursive" }}>
+                {MODEL.artist_name}
+              </span>
+              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+              <div className="flex items-center gap-2">
+                {MODEL.tags.slice(0, 2).map((tag, i) => (
+                  <span key={`${tag}-${i}`} className="text-[15px] font-black tracking-widest text-gray-500 uppercase px-2 py-0.5 bg-gray-50 rounded border border-gray-100">
+                    {tag}
                   </span>
-                </div>
-              ) : (
-                <span className="text-[32px] font-bold text-gray-800 uppercase shrink-0 leading-[0.8]" style={{ fontFamily: "'Orbitron', sans-serif" }}>{selectedModel?.model_name || 'Select Model'}</span>
-              )}
-            </div>
-
-            {selectedModel?.artist_name && (
-              <>
-                <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-                <div className="flex flex-col items-start gap-1 shrink-0">
-                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Artist</span>
-                  <span
-                    className="text-[26px] text-black leading-[0.8]"
-                    style={{ fontFamily: "'Rock Salt', cursive" }}
-                  >
-                    {selectedModel.artist_name}
-                  </span>
-                </div>
-              </>
-            )}
-
-            {selectedModel?.tags && selectedModel.tags.length > 0 && (
-              <>
-                <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-                <div className="flex flex-col items-start gap-1 shrink-0">
-                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Tags</span>
-                  <div className="flex items-center gap-2 shrink-0 flex-nowrap whitespace-nowrap pt-1">
-                    {selectedModel.tags.slice(0, 2).map((tag, i) => (
-                      <span key={`${tag}-${i}`} className="text-[18px] font-black tracking-widest text-gray-500 uppercase leading-[0.8] px-2 py-0.5 bg-gray-50 rounded border border-gray-100">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="w-[1px] h-10 bg-gray-200 shrink-0"></div>
-            <div className="flex flex-col items-start gap-1 shrink-0">
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 leading-[0.8] pb-1">Most Loved</span>
-              <div className="flex items-center gap-1 shrink-0 pt-1">
+                ))}
+              </div>
+              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+              <div className="flex items-center gap-1">
                 {[1,2,3,4,5].map((star) => (
-                  <svg key={star} className="w-[24px] h-[24px] text-yellow-400 fill-current shrink-0" viewBox="0 0 20 20">
+                  <svg key={star} className="w-[22px] h-[22px] text-yellow-400 fill-current" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                   </svg>
                 ))}
@@ -297,20 +263,18 @@ export default function App() {
                   />
                 </div>
 
-                <div style={{ border: '2px solid #000000', borderRadius: '30px' }}>
-                  <MotionAccordion
-                    items={[{
-                      question: (
-                        <span className="flex items-center gap-3">
-                          <Lock className="w-4 h-4 shrink-0 text-gray-500" />
-                          <span className="text-[13px] font-bold tracking-[0.2em] uppercase text-gray-500">Click to Unlock</span>
-                        </span>
-                      ),
-                      answer: promptQuestion
-                    }]}
-                    className="w-full"
-                  />
-                </div>
+                <MotionAccordion
+                  items={[{
+                    question: (
+                      <span className="flex items-center gap-3">
+                        <Lock className="w-4 h-4 shrink-0 text-gray-500" />
+                        <span className="text-[13px] font-bold tracking-[0.2em] uppercase text-gray-500">Click to Unlock</span>
+                      </span>
+                    ),
+                    answer: promptQuestion
+                  }]}
+                  className="w-full overflow-hidden rounded-[30px] border-[2px] border-black"
+                />
               </div>
 
               {/* Textarea - flex-1 locks bottom to button, top floats */}
@@ -325,16 +289,14 @@ export default function App() {
               />
 
               {/* BUTTON - isolated at bottom, never moves */}
-              {selectedModel && (
-                <button
-                  onClick={handleGenerateImage}
-                  disabled={isGenerating || !promptText.trim()}
-                  className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <Wand2 className="w-5 h-5" />
-                  {isGenerating ? 'CREATING...' : 'CREATE MY IMAGE'}
-                </button>
-              )}
+              <button
+                onClick={handleGenerateImage}
+                disabled={isGenerating || !promptText.trim()}
+                className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Wand2 className="w-5 h-5" />
+                {isGenerating ? 'CREATING...' : 'CREATE MY IMAGE'}
+              </button>
             </div>
 
             {/* RIGHT - RENDERS */}
@@ -402,19 +364,30 @@ export default function App() {
                   <div className="flex-1 min-h-0 flex flex-col items-center">
                     {generatedImages.length > 0 ? (
                       <div className={cn(
-                        "w-full aspect-square max-h-full rounded-3xl overflow-hidden shadow-lg bg-gray-100",
-                        generatedImages.length > 1 ? "grid gap-2 p-2" : "",
+                        "w-full rounded-3xl overflow-hidden shadow-lg bg-gray-100",
+                        generatedImages.length === 1 ? "aspect-square" : "grid gap-2 p-2",
                         generatedImages.length === 2 ? "grid-cols-2" : "",
-                        generatedImages.length >= 3 ? "grid-cols-2 grid-rows-2" : ""
+                        generatedImages.length === 3 ? "grid-cols-2 grid-rows-2" : "",
+                        generatedImages.length === 4 ? "grid-cols-2 grid-rows-2" : ""
                       )}>
                         {generatedImages.length === 1 ? (
-                          <img src={generatedImages[0]} alt="Generated result" className="w-full h-full object-cover" />
+                          <img
+                            src={generatedImages[0]}
+                            alt="Generated result"
+                            className="w-full h-full object-cover cursor-zoom-in"
+                            onClick={() => setLightboxImg(generatedImages[0])}
+                          />
                         ) : (
                           generatedImages.map((img, i) => (
-                            <div key={i} className={cn(
-                              "relative overflow-hidden rounded-xl bg-gray-200 w-full h-full",
-                              generatedImages.length === 3 && i === 2 ? "col-span-2" : ""
-                            )}>
+                            <div
+                              key={i}
+                              className={cn(
+                                "relative overflow-hidden rounded-xl bg-gray-200 cursor-zoom-in",
+                                generatedImages.length === 3 && i === 2 ? "col-span-2" : ""
+                              )}
+                              style={{ aspectRatio: '1 / 1' }}
+                              onClick={() => setLightboxImg(img)}
+                            >
                               <img src={img} alt={`Generated result ${i+1}`} className="w-full h-full object-cover" />
                             </div>
                           ))
@@ -442,6 +415,28 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setLightboxImg(null)}
+        >
+          <button
+            onClick={() => setLightboxImg(null)}
+            className="absolute top-4 right-4 text-white text-3xl leading-none font-bold hover:text-gray-300 transition-colors"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <img
+            src={lightboxImg}
+            alt="Full size"
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

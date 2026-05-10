@@ -159,7 +159,7 @@ export function MotionAccordion({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex flex-col rounded-[34px] p-3 " style={{ gap }}>
+      <div className="flex flex-col" style={{ gap }}>
         {items.map((item, i) => (
           <AccordionItem
             key={i}
