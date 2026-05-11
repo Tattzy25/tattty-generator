@@ -112,7 +112,7 @@ export default function App() {
           className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
         >
           {/* Header */}
-          <div className="w-full bg-white flex items-start justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-3 px-6 overflow-hidden gap-6 whitespace-nowrap">
+          <div className="w-full bg-white flex flex-wrap lg:flex-nowrap items-start justify-start lg:justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-3 px-6 gap-x-6 gap-y-4">
             {/* Model */}
             <div className="flex flex-col items-start gap-1 shrink-0">
               <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Model</span>
@@ -128,7 +128,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Artist */}
             <div className="flex flex-col items-start gap-1 shrink-0">
@@ -138,7 +138,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Tags */}
             <div className="flex flex-col items-start gap-1 shrink-0">
@@ -152,12 +152,12 @@ export default function App() {
               </div>
             </div>
 
-            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Most Loved */}
             <div className="flex flex-col items-start gap-1 shrink-0">
               <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Most Loved</span>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 {[1,2,3,4,5].map((star) => (
                   <svg key={star} className="w-[22px] h-[22px] text-yellow-400 fill-current" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -167,7 +167,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] h-full relative">
+          <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] relative">
 
             {/* LEFT - VERTICAL MODEL CAROUSEL */}
             <div className="hidden lg:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
@@ -209,9 +209,36 @@ export default function App() {
             </div>
 
             {/* MIDDLE - TRIGGER WORD, PROMPT, UPLOAD */}
-            <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
+            <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col lg:justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
+
+              {/* MOBILE STYLE CAROUSEL */}
+              <div className="flex lg:hidden w-full overflow-x-auto hide-scrollbar gap-3 pb-2 px-1 pt-[20px]">
+                {carouselImages.map((item, idx) => {
+                  const isSelected = selectedCarouselIdx === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedCarouselIdx(isSelected ? null : idx)}
+                      className={cn(
+                        "flex-shrink-0 rounded-[16px] overflow-hidden border-[3px] transition-colors duration-150 focus-visible:outline-none flex flex-col",
+                        isSelected ? "border-black" : "border-transparent"
+                      )}
+                    >
+                      <div className="w-[100px] h-[100px] relative">
+                        <img src={item.url} alt={item.label} loading="lazy" className="w-full h-full object-cover" />
+                        {item.label && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
+                            <span className="text-white text-[8px] font-bold tracking-[0.1em] uppercase">{item.label}</span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* TOP CONTENT */}
-              <div className="w-full flex flex-col items-center gap-4 pt-[20px]">
+              <div className="w-full flex flex-col items-center gap-4 pt-[20px] lg:pt-[20px]">
                 <div className="flex flex-col items-center gap-2">
                   <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Color Mode</div>
                   <div className="flex items-center gap-2">
