@@ -20,7 +20,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
 
-  const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number | null>(null);
+  const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number>(0);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const promptQuestion = import.meta.env.VITE_PROMPT_QUESTION;
 
@@ -67,7 +67,7 @@ export default function App() {
             name: 'TaTTTy-MCP',
             arguments: {
               user_story: promptText.trim(),
-              artistic_style: selectedCarouselIdx !== null ? carouselImages[selectedCarouselIdx].label : undefined,
+              artistic_style: carouselImages[selectedCarouselIdx].label,
               color_prefrence: colorMode,
               number_of_outputs: parseInt(numOutputs),
             },
@@ -181,7 +181,7 @@ export default function App() {
                   return (
                     <button
                       key={idx}
-                      onClick={() => setSelectedCarouselIdx(isSelected ? null : realIdx)}
+                      onClick={() => setSelectedCarouselIdx(realIdx)}
                       className={cn(
                         "w-[150px] flex-shrink-0 rounded-[20px] overflow-hidden border-[3px] transition-colors duration-150 focus-visible:outline-none flex flex-col",
                         isSelected ? "border-black" : "border-transparent"
@@ -218,7 +218,7 @@ export default function App() {
                   return (
                     <button
                       key={idx}
-                      onClick={() => setSelectedCarouselIdx(isSelected ? null : idx)}
+                      onClick={() => setSelectedCarouselIdx(idx)}
                       className={cn(
                         "flex-shrink-0 rounded-[16px] overflow-hidden border-[3px] transition-colors duration-150 focus-visible:outline-none flex flex-col",
                         isSelected ? "border-black" : "border-transparent"
