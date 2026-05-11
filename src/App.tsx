@@ -144,18 +144,10 @@ export default function App() {
           className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
         >
           {/* Header */}
-          <div className="w-full bg-white flex items-center justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-2 px-6 overflow-hidden">
-            <div className="grid gap-x-6 items-start whitespace-nowrap" style={{ gridTemplateColumns: 'auto 1px auto 1px auto 1px auto', gridTemplateRows: 'auto auto' }}>
-              {/* Labels row */}
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Model</span>
-              <div />
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Artist</span>
-              <div />
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Tags</span>
-              <div />
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 pb-1">Most Loved</span>
-
-              {/* Values row */}
+          <div className="w-full bg-white flex items-start justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-3 px-6 overflow-hidden gap-6 whitespace-nowrap">
+            {/* Model */}
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Model</span>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-[28px] font-bold text-gray-800 uppercase leading-none" style={{ fontFamily: "'Orbitron', sans-serif" }}>
                   {MODEL.model_name.split('/')[0]}
@@ -166,11 +158,23 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+            </div>
+
+            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+
+            {/* Artist */}
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Artist</span>
               <span className="text-[22px] text-black leading-none" style={{ fontFamily: "'Rock Salt', cursive" }}>
                 {MODEL.artist_name}
               </span>
-              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+            </div>
+
+            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+
+            {/* Tags */}
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Tags</span>
               <div className="flex items-center gap-2">
                 {MODEL.tags.slice(0, 2).map((tag, i) => (
                   <span key={`${tag}-${i}`} className="text-[15px] font-black tracking-widest text-gray-500 uppercase px-2 py-0.5 bg-gray-50 rounded border border-gray-100">
@@ -178,7 +182,13 @@ export default function App() {
                   </span>
                 ))}
               </div>
-              <div className="bg-gray-200 w-[1px] row-span-2 self-stretch" />
+            </div>
+
+            <div className="w-[1px] self-stretch bg-gray-200 shrink-0" />
+
+            {/* Most Loved */}
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Most Loved</span>
               <div className="flex items-center gap-1">
                 {[1,2,3,4,5].map((star) => (
                   <svg key={star} className="w-[22px] h-[22px] text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -233,7 +243,7 @@ export default function App() {
             {/* MIDDLE - TRIGGER WORD, PROMPT, UPLOAD */}
             <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
               {/* TOP CONTENT */}
-              <div className="w-full flex flex-col items-center gap-4">
+              <div className="w-full flex flex-col items-center gap-4 pt-[20px]">
                 <div className="flex flex-col items-center gap-2">
                   <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Color Mode</div>
                   <div className="flex items-center gap-2">
@@ -300,7 +310,7 @@ export default function App() {
             </div>
 
             {/* RIGHT - RENDERS */}
-            <div className="w-full lg:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both">
+            <div className="w-full lg:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both pt-[20px]">
               <div className="w-full flex flex-col h-full">
                 <div className="w-full flex flex-col h-[560px]">
                   {/* Action Icons */}
