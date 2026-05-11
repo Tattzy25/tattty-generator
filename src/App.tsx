@@ -23,7 +23,7 @@ export default function App() {
 
   const [selectedCarouselIdx, setSelectedCarouselIdx] = useState<number | null>(null);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
-  const promptQuestion = import.meta.env.VITE_PROMPT_QUESTION || 'What style are you going for?';
+  const promptQuestion = import.meta.env.VITE_PROMPT_QUESTION;
 
 
   const carouselImages = [
@@ -69,7 +69,7 @@ export default function App() {
             version: MODEL.version,
             gen_id: MODEL.gen_id,
             trigger_word: MODEL.trigger_word,
-            num_outputs: parseInt(numOutputs) || 1
+            num_outputs: parseInt(numOutputs)
           },
         },
       };
@@ -120,7 +120,7 @@ export default function App() {
 
     } catch (error: any) {
       console.error("Generation error:", error);
-      toast.error(error.message || "System error. Please try again later.");
+      toast.error(error.message);
     } finally {
       setIsGenerating(false);
     }
