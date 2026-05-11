@@ -112,7 +112,7 @@ export default function App() {
           className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
         >
           {/* Header */}
-          <div className="w-full bg-white flex flex-wrap lg:flex-nowrap items-start justify-start lg:justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-3 px-6 gap-x-6 gap-y-4">
+          <div className="w-full bg-white flex flex-wrap md:flex-nowrap items-start justify-start md:justify-center shrink-0 border-b-2 border-black/5 shadow-sm py-3 px-6 gap-x-6 gap-y-4">
             {/* Model */}
             <div className="flex flex-col items-start gap-1 shrink-0">
               <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400">Model</span>
@@ -128,7 +128,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden md:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Artist */}
             <div className="flex flex-col items-start gap-1 shrink-0">
@@ -138,7 +138,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden md:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Tags */}
             <div className="flex flex-col items-start gap-1 shrink-0">
@@ -152,7 +152,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="hidden lg:block w-[1px] self-stretch bg-gray-200 shrink-0" />
+            <div className="hidden md:block w-[1px] self-stretch bg-gray-200 shrink-0" />
 
             {/* Most Loved */}
             <div className="flex flex-col items-start gap-1 shrink-0">
@@ -167,10 +167,10 @@ export default function App() {
             </div>
           </div>
 
-          <div className="w-full flex flex-col lg:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] relative">
+          <div className="w-full flex flex-col md:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] relative">
 
             {/* LEFT - VERTICAL MODEL CAROUSEL */}
-            <div className="hidden lg:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
+            <div className="hidden md:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
               <div
                 className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-6 py-4 items-center"
                 style={{ WebkitOverflowScrolling: 'touch' }}
@@ -209,10 +209,10 @@ export default function App() {
             </div>
 
             {/* MIDDLE - TRIGGER WORD, PROMPT, UPLOAD */}
-            <div className="w-full lg:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col lg:justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
+            <div className="w-full md:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col md:justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
 
               {/* MOBILE STYLE CAROUSEL */}
-              <div className="flex lg:hidden w-full overflow-x-auto hide-scrollbar gap-3 pb-2 px-1 pt-[20px]">
+              <div className="flex md:hidden w-full overflow-x-auto hide-scrollbar gap-3 pb-2 px-1 pt-[20px]">
                 {carouselImages.map((item, idx) => {
                   const isSelected = selectedCarouselIdx === idx;
                   return (
@@ -305,7 +305,7 @@ export default function App() {
             </div>
 
             {/* RIGHT - RENDERS */}
-            <div className="w-full lg:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both pt-[20px]">
+            <div className="w-full md:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both pt-[20px]">
               <div className="w-full flex flex-col h-full">
                 <div className="w-full flex flex-col h-[560px]">
                   {/* Action Icons */}
