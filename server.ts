@@ -3,67 +3,92 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
-// @ts-ignore
-import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const DIFY_MCP_URL = process.env.DIFY_MCP_URL!;
+const UPSTREAM_TIMEOUT_MS = Number(process.env.UPSTREAM_TIMEOUT_MS || 120000);
+
+type JsonRpcEnvelope = {
+  jsonrpc?: string;
+  id?: string | number;
+  result?: unknown;
+  error?: { code?: number; message?: string };
+};
+
+async function mcpRpc(
+  method: string,
+  params: unknown
+): Promise<{ ok: true; json: JsonRpcEnvelope } | { ok: false; status: number; text: string }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  try {
+    const res = await fetch(DIFY_MCP_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-User-ID": "ak1234",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: method, method, params }),
+    });
+    const text = await res.text();
+    if (!res.ok) return { ok: false, status: res.status, text };
+    try {
+      return { ok: true, json: JSON.parse(text) };
+    } catch (parseErr: any) {
+      return { ok: false, status: 502, text: `Invalid JSON: ${parseErr.message} — body: ${text.slice(0, 200)}` };
+    }
+  } catch (err: any) {
+    const isAbort = err?.name === "AbortError";
+    return { ok: false, status: isAbort ? 504 : 502, text: isAbort ? "Upstream timed out" : err?.message };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function startServer() {
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+  const PORT = Number(process.env.PORT) || 8080;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
 
-  // API routes
-  app.post("/api/build-model", async (req, res) => {
-    const { modelName, triggerWord, artistName } = req.body;
-    
-    console.log(`Starting backend build process for model: ${modelName}`);
-    
-    // This is where the "MCP call" or backend-to-backend process would happen.    
-    try {
-      // Simulate backend processing time
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
-      res.json({ 
-        success: true, 
-        message: "Model built successfully on the backend.",
-        modelId: `model_${Date.now()}`
-      });
-    } catch (error) {
-      console.error("Backend build error:", error);
-      res.status(500).json({ success: false, error: "Failed to build model on the backend." });
-    }
-  });
+  app.post("/api/generate", async (req: any, res: any) => {
+    const args = req.body?.params?.arguments;
+    if (!args) return res.status(400).json({ success: false, error: "Missing arguments" });
 
-  const upload = multer({ storage: multer.memoryStorage() });
+    const init = await mcpRpc("initialize", {
+      protocolVersion: "2024-11-05",
+      capabilities: {},
+      clientInfo: { name: "tattty-generator", version: "1.0" },
+    });
+    if (!init.ok) return res.status(init.status).json({ success: false, error: init.text });
 
-  app.post("/api/generate-image", express.json(), async (req: any, res: any) => {
-    const payload = req.body;
+    const call = await mcpRpc("tools/call", {
+      name: "TaTTTy-MCP",
+      arguments: {
+        user_story: args.user_story,
+        artistic_style: args.artistic_style,
+        color_prefrence: args.color_prefrence,
+        number_of_outputs: args.number_of_outputs,
+      },
+    });
+    if (!call.ok) return res.status(call.status).json({ success: false, error: call.text });
+    if (call.json.error) return res.status(502).json({ success: false, error: call.json.error.message });
 
-    console.log("Calling MCP server with payload:", JSON.stringify(payload, null, 2));
+    const result = call.json.result as any;
+    const textContent = result?.content?.find((c: any) => c.type === "text" && typeof c.text === "string")?.text;
+    if (!textContent) return res.status(502).json({ success: false, error: "No content in response" });
 
     try {
-      const mcpUrl = process.env.MCP_SERVER_URL || "";
-      const mcpResponse = await fetch(mcpUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!mcpResponse.ok) {
-        throw new Error(`MCP Server responded with status: ${mcpResponse.status}`);
-      }
-
-      const data = await mcpResponse.json();
-      console.log("MCP Response:", data);
-      res.json(data);
-    } catch (error: any) {
-      console.error("MCP Server Request Error:", error);
-      res.status(500).json({ error: { message: error.message } });
+      const parsed = JSON.parse(textContent);
+      const urls = (Object.values(parsed) as any[]).filter((v) => typeof v === "string" && v.startsWith("http"));
+      if (!urls.length) return res.status(502).json({ success: false, error: "No image URLs in response" });
+      return res.json({ success: true, output: urls });
+    } catch (parseErr: any) {
+      return res.status(502).json({ success: false, error: parseErr.message });
     }
   });
 

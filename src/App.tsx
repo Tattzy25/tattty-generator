@@ -76,37 +76,11 @@ export default function App() {
         }),
       });
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      if (!res.body) throw new Error('No response body.');
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let found = false;
-
-      const extractUrls = (json: any): string[] => {
-        const text = json?.result?.content?.[0]?.text;
-        if (!text) return [];
-        try {
-          const parsed = JSON.parse(text);
-          return (Object.values(parsed) as string[]).filter(v => typeof v === 'string' && v.startsWith('http'));
-        } catch { return []; }
-      };
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        try {
-          const json = JSON.parse(buffer.trim());
-          if (json.error) throw new Error(JSON.stringify(json.error));
-          const urls = extractUrls(json);
-          if (urls.length) { setGeneratedImages(urls); found = true; break; }
-        } catch {}
-      }
-
-      if (!found) throw new Error('No image URLs in response.');
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(JSON.stringify(data));
+      const urls: string[] = data.output;
+      if (!urls.length) throw new Error('No image URLs in response.');
+      setGeneratedImages(urls);
       toast.success('Image Generated Successfully');
     } catch (error: any) {
       toast.error(error.message);
