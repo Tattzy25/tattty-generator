@@ -55,6 +55,7 @@ export default function App() {
     }
 
     setIsGenerating(true);
+    setGeneratedImages([]);
     try {
       const res = await fetch(DIFY_MCP_URL, {
         method: 'POST',
