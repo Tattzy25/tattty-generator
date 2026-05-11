@@ -373,14 +373,14 @@ export default function App() {
                     )}
                   </div>
                   {/* Image / Placeholder */}
-                  <div className="flex-1 min-h-0 flex flex-col items-center">
+                  <div className="flex-1 min-h-0 w-full">
                     {generatedImages.length > 0 ? (
                       <div className={cn(
-                        "w-full rounded-3xl overflow-hidden shadow-lg bg-gray-100",
-                        generatedImages.length === 1 ? "aspect-square" : "grid gap-2 p-2",
-                        generatedImages.length === 2 ? "grid-cols-2" : "",
-                        generatedImages.length === 3 ? "grid-cols-2 grid-rows-2" : "",
-                        generatedImages.length === 4 ? "grid-cols-2 grid-rows-2" : ""
+                        "w-full h-full rounded-3xl overflow-hidden shadow-lg bg-gray-100",
+                        generatedImages.length > 1 && "grid gap-2 p-2",
+                        generatedImages.length === 2 && "grid-cols-2",
+                        generatedImages.length === 3 && "grid-cols-2 grid-rows-2",
+                        generatedImages.length === 4 && "grid-cols-2 grid-rows-2"
                       )}>
                         {generatedImages.length === 1 ? (
                           <img
@@ -397,7 +397,6 @@ export default function App() {
                                 "relative overflow-hidden rounded-xl bg-gray-200 cursor-zoom-in",
                                 generatedImages.length === 3 && i === 2 ? "col-span-2" : ""
                               )}
-                              style={{ aspectRatio: '1 / 1' }}
                               onClick={() => setLightboxImg(img)}
                             >
                               <img src={img} alt={`Generated result ${i+1}`} className="w-full h-full object-cover" />
@@ -406,7 +405,7 @@ export default function App() {
                         )}
                       </div>
                     ) : (
-                      <div className="w-full aspect-square max-h-full rounded-3xl overflow-hidden shadow-lg bg-gray-50 flex items-center justify-center">
+                      <div className="w-full h-full rounded-3xl overflow-hidden shadow-lg bg-gray-50 flex items-center justify-center">
                         {isGenerating ? (
                           <div className="flex flex-col items-center gap-4">
                             <div className="w-20 h-20 border-4 border-black border-t-transparent rounded-full animate-spin" />
