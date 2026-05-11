@@ -60,7 +60,7 @@ function AccordionItem({
         aria-controls={panelId}
         aria-expanded={isOpen}
         onClick={onToggle}
-        className="flex w-full cursor-pointer select-none items-center justify-between gap-4 px-7 py-5 text-left"
+        className="flex w-full cursor-pointer select-none items-center justify-between gap-4 px-[14px] py-[10px] text-left"
       >
         <span className="text-[clamp(1.2rem,1.6vw,1.3rem)] font-medium leading-snug">
           {item.question}

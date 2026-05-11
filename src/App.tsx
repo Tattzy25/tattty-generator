@@ -167,12 +167,17 @@ export default function App() {
             </div>
           </div>
 
-          <div className="w-full flex flex-col md:flex-row justify-center items-stretch gap-8 xl:gap-10 p-[10px] relative">
+          <div className="w-full flex flex-col md:flex-row justify-center items-stretch gap-4 xl:gap-5 p-[10px] relative">
 
             {/* LEFT - VERTICAL MODEL CAROUSEL */}
-            <div className="hidden md:flex w-[150px] flex-shrink-0 flex-col h-[560px]">
+            <div className="hidden md:flex w-[150px] flex-shrink-0 flex-col h-[450px] pt-[30px]">
+              <div className="relative w-full flex-1 overflow-hidden">
+                {/* Top fade */}
+                <div className="absolute top-0 left-0 right-0 h-[40px] z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #ffffff, transparent)' }} />
+                {/* Bottom fade */}
+                <div className="absolute bottom-0 left-0 right-0 h-[40px] z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, #ffffff, transparent)' }} />
               <div
-                className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-6 py-4 items-center"
+                className="w-full h-full overflow-y-auto hide-scrollbar flex flex-col gap-3 py-2 items-center"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {[...carouselImages, ...carouselImages, ...carouselImages].map((item, idx) => {
@@ -206,13 +211,14 @@ export default function App() {
                   );
                 })}
               </div>
+              </div>
             </div>
 
             {/* MIDDLE - TRIGGER WORD, PROMPT, UPLOAD */}
-            <div className="w-full md:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col md:justify-between animate-in fade-in duration-700 delay-150 fill-mode-both">
+            <div className="w-full md:w-[340px] xl:w-[380px] flex-shrink-0 flex flex-col animate-in fade-in duration-700 delay-150 fill-mode-both">
 
               {/* MOBILE STYLE CAROUSEL */}
-              <div className="flex md:hidden w-full overflow-x-auto hide-scrollbar gap-3 pb-2 px-1 pt-[20px]">
+              <div className="flex md:hidden w-full overflow-x-auto hide-scrollbar gap-2 pb-1 px-1 pt-[10px]">
                 {carouselImages.map((item, idx) => {
                   const isSelected = selectedCarouselIdx === idx;
                   return (
@@ -238,7 +244,7 @@ export default function App() {
               </div>
 
               {/* TOP CONTENT */}
-              <div className="w-full flex flex-col items-center gap-4 pt-[20px] lg:pt-[20px]">
+              <div className="w-full flex flex-col items-center gap-2 pt-[20px]">
                 <div className="flex flex-col items-center gap-2">
                   <div className="text-[14px] font-bold tracking-[0.2em] text-black uppercase">Color Mode</div>
                   <div className="flex items-center gap-2">
@@ -289,7 +295,7 @@ export default function App() {
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
-                className="w-full p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-y text-[18px] mt-[20px] mb-[10px] min-h-[160px]"
+                className="w-full p-3 rounded-xl focus:ring-2 focus:ring-black/5 outline-none transition-all text-black text-left font-medium placeholder:text-gray-300 bg-transparent resize-y text-[18px] mt-[10px] mb-[6px] min-h-[160px]"
                 placeholder="A cinematic portrait..."
               />
 
@@ -307,7 +313,7 @@ export default function App() {
             {/* RIGHT - RENDERS */}
             <div className="w-full md:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both pt-[20px]">
               <div className="w-full flex flex-col h-full">
-                <div className="w-full flex flex-col h-[560px]">
+                <div className="w-full flex flex-col h-[480px]">
                   {/* Action Icons */}
                   <div className={cn(
                     "flex items-center justify-center gap-3 transition-all duration-300",
