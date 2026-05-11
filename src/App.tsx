@@ -5,7 +5,7 @@ import { MotionAccordion } from './components/unlumen-ui/motion-faqs-accordion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const DIFY_MCP_URL = 'https://api.dify.ai/mcp/server/GTzA5abY7oZKPAsG/mcp';
+const DIFY_MCP_URL = '/api/generate';
 
 const MODEL = {
   model_name: 'tattzy25/tattty_4_all',
@@ -78,7 +78,7 @@ export default function App() {
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) throw new Error(JSON.stringify(data.error));
 
       const resultText = data.result?.content?.[0]?.text;
       if (!resultText) throw new Error('No response from server.');
@@ -105,7 +105,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center py-4 md:py-8 px-[10px]">
+    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center py-2 md:py-4 px-[10px]">
       <div className="w-full max-w-[1400px] mx-auto animate-in fade-in duration-500 flex flex-col">
         <div
           style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
