@@ -5,13 +5,12 @@ import { MotionAccordion } from './components/unlumen-ui/motion-faqs-accordion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+const DIFY_MCP_URL = 'https://api.dify.ai/mcp/server/GTzA5abY7oZKPAsG/mcp';
+
 const MODEL = {
   model_name: 'tattzy25/tattty_4_all',
   artist_name: 'TaTTTy',
   tags: ['Tattoo', 'Portrait'],
-  gen_id: '',
-  version: '',
-  trigger_word: '',
 };
 
 export default function App() {
@@ -50,76 +49,45 @@ export default function App() {
   ];
 
   const handleGenerateImage = async () => {
-    if (!promptText.trim()) {
-      toast.error("Prompt is required.");
+    if (promptText.trim().length < 10) {
+      toast.error('Please write at least 10 characters to describe your vision.');
       return;
     }
 
     setIsGenerating(true);
     try {
-      const mcpPayload = {
-        jsonrpc: "2.0",
-        id: MODEL.gen_id,
-        method: "tools/call",
-        params: {
-          name: "artists_n_models",
-          arguments: {
-            artist_prompt: promptText.trim(),
-            artist_color: colorMode,
-            version: MODEL.version,
-            gen_id: MODEL.gen_id,
-            trigger_word: MODEL.trigger_word,
-            num_outputs: parseInt(numOutputs)
+      const res = await fetch(DIFY_MCP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Date.now().toString(),
+          method: 'tools/call',
+          params: {
+            name: 'TaTTTy-MCP',
+            arguments: {
+              user_story: promptText.trim(),
+              artistic_style: selectedCarouselIdx !== null ? carouselImages[selectedCarouselIdx].label : undefined,
+              color_prefrence: colorMode,
+              number_of_outputs: parseInt(numOutputs),
+            },
           },
-        },
-      };
-
-      const response = await fetch("/api/generate-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(mcpPayload)
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server connection issue. Please try again.`);
-      }
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error("Unable to complete generation. Please try again.");
-      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
 
       const resultText = data.result?.content?.[0]?.text;
+      if (!resultText) throw new Error('No response from server.');
 
-      if (!resultText) {
-        throw new Error("Invalid response format from server.");
-      }
-
-      let parsedImages: string[] = [];
-      try {
-        const parsed = JSON.parse(resultText);
-        if (Array.isArray(parsed)) {
-          parsedImages = parsed;
-        } else {
-          parsedImages = [resultText];
-        }
-      } catch {
-        const urls = resultText.match(/https?:\/\/[^\s"',]+/g);
-        if (urls && urls.length > 0) {
-          parsedImages = urls;
-        } else {
-          parsedImages = [resultText];
-        }
-      }
-
-      setGeneratedImages(parsedImages);
-      toast.success("Image Generated Successfully");
-
+      const urls = resultText.match(/https?:\/\/[^\s"',]+/g);
+      if (!urls) throw new Error('No image URLs in response.');
+      setGeneratedImages(urls);
+      toast.success('Image Generated Successfully');
     } catch (error: any) {
-      console.error("Generation error:", error);
       toast.error(error.message);
     } finally {
       setIsGenerating(false);
