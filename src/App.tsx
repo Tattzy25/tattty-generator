@@ -83,8 +83,9 @@ export default function App() {
       const resultText = data.result?.content?.[0]?.text;
       if (!resultText) throw new Error('No response from server.');
 
-      const urls = resultText.match(/https?:\/\/[^\s"',]+/g);
-      if (!urls) throw new Error('No image URLs in response.');
+      const parsed = JSON.parse(resultText);
+      const urls = Object.values(parsed) as string[];
+      if (!urls.length) throw new Error('No image URLs in response.');
       setGeneratedImages(urls);
       toast.success('Image Generated Successfully');
     } catch (error: any) {
