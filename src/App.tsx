@@ -323,8 +323,8 @@ export default function App() {
               {/* BUTTON - isolated at bottom, never moves */}
               <button
                 onClick={handleGenerateImage}
-                disabled={isGenerating || !promptText.trim()}
-                className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={isGenerating}
+                className="w-full bg-black text-white rounded-xl py-4 font-bold text-[14px] tracking-[0.25em] uppercase hover:bg-gray-900 active:scale-[0.98] transition-all shadow-xl disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Wand2 className="w-5 h-5" />
                 {isGenerating ? 'CREATING...' : 'CREATE MY IMAGE'}
@@ -349,7 +349,7 @@ export default function App() {
                               setTimeout(() => {
                                 const a = document.createElement('a');
                                 a.href = img;
-                                a.download = `tattty-${i+1}.png`;
+                                a.download = `TaTTTy-${i+1}.png`;
                                 document.body.appendChild(a);
                                 a.click();
                                 document.body.removeChild(a);
@@ -413,7 +413,7 @@ export default function App() {
                               <img src={img} alt={`Generated result ${i+1}`} className="w-full h-full object-cover" />
                               <button
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); const a = document.createElement('a'); a.href = img; a.download = `tattty-${i+1}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
+                                onClick={(e) => { e.stopPropagation(); const a = document.createElement('a'); a.href = img; a.download = `TaTTTy-${i+1}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
                                 className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black"
                               >
                                 <Download className="w-3.5 h-3.5" />
@@ -458,20 +458,39 @@ export default function App() {
           >
             ×
           </button>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); const a = document.createElement('a'); a.href = lightboxImg; a.download = 'tattty.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
-            className="absolute top-4 right-16 p-2 rounded-full bg-white/10 text-white hover:bg-white/25 transition-colors"
-            aria-label="Download"
-          >
-            <Download className="w-5 h-5" />
-          </button>
           <img
             src={lightboxImg}
             alt="Full size"
             className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
+          {/* Lightbox action bar */}
+          <div
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/60 backdrop-blur-sm px-5 py-3 rounded-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => { const a = document.createElement('a'); a.href = lightboxImg; a.download = 'TaTTTy.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
+              className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors text-[13px] font-bold tracking-wider uppercase"
+            >
+              <Download className="w-4 h-4" />
+              Download
+            </button>
+            <div className="w-[1px] h-4 bg-white/30" />
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: 'TaTTTy', text: 'Yo look, check what I just created on TaTTTy 🔥', url: window.location.href });
+                }
+              }}
+              className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors text-[13px] font-bold tracking-wider uppercase"
+            >
+              <Share2 className="w-4 h-4" />
+              Share
+            </button>
+          </div>
         </div>
       )}
     </div>
