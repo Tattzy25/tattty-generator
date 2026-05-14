@@ -307,8 +307,8 @@ export default function App() {
 
             {/* RIGHT - RENDERS */}
             <div className="w-full md:flex-1 animate-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both pt-[20px]">
-              <div className="w-full flex flex-col h-full">
-                <div className="w-full flex flex-col h-[480px]">
+              <div className="w-full flex flex-col">
+                <div className="w-full flex flex-col h-[320px] md:h-[480px]">
                   {/* Action Icons */}
                   <div className={cn(
                     "flex items-center justify-center gap-3 transition-all duration-300",
