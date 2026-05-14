@@ -102,9 +102,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center py-2 md:py-4 px-[10px]">
       <div className="w-full max-w-[1400px] mx-auto animate-in fade-in duration-500 flex flex-col">
-        <div className="w-full flex flex-col relative">
+        <div
+          style={{ borderColor: '#000000', borderStyle: 'outset', borderWidth: '3px' }}
+          className="w-full rounded-[40px] overflow-hidden bg-white shadow-2xl flex flex-col relative"
+        >
           {/* Header */}
-          <div className="w-full shrink-0 py-2 md:py-3 px-4 md:px-6">
+          <div className="w-full bg-white shrink-0 border-b-2 border-black/5 shadow-sm py-2 md:py-3 px-4 md:px-6">
             {/* Mobile: centered layout */}
             <div className="flex md:hidden flex-col items-center gap-1.5">
               {/* Row 1: Model name */}
